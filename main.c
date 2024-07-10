@@ -21,14 +21,18 @@ int main(int argc, char* argv[]) {
 
 	initalizePointerLabels();
 
-	if (argv[1] != NULL) {
-		char* dot = strrchr(argv[1], '.');
-		if (dot && !strcmp(argv[1], ".hxl")) {
+
+	if (argv[1] != NULL && strcmp(argv[1], "--file") == 0) {
+		if (argv[2] == NULL) {
+			printf("Please specify a file.\n\n");
+			exit(1);
+		}
+		else {
 			FILE* fp;
-			fp = fopen(argv[1], "r");
+			fp = fopen(argv[2], "r");
 			if (fp == NULL) {
 				perror("Failed: ");
-				return 1;
+				exit(1);
 			}
 
 			char buffer[8191];
@@ -40,6 +44,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			fclose(fp);
+			exit(0);
 		}
 	}
 
@@ -47,7 +52,10 @@ int main(int argc, char* argv[]) {
 	printf("By: @CoderQC\n"); // Replace this line once it's open source :D
 	char* input;
 	while (true) {
-		input = calloc(8191,1);
+
+		// Maybe handle arrow keys for Linux sometime soon, but ncurses doesn't work for me.
+
+		input = calloc(8191, 1);
 		printf("> ");
 		fgets(input, 8191, stdin);
 		ProcessInput(input, token, 8191);

@@ -86,9 +86,25 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 			printf("  memset <pointer> <value> - Sets a specified memory location to a specified value.\n");
 			printf("  alloc <size> - Sets a specified memory location to a specified value.\n");
 			printf("  free <pointer> - Frees an allocated memory space. (can crash on Unix systems if not careful!)\n");
-			printf("  plabel <pointer> - Labels a pointer with a specified name.\n");
-			printf("  punlabel <label> - Removes the pointer label specified.\n");
-		}
+			printf("  plabel <pointer> <name> - Labels a pointer with a specified name.\n");
+			printf("  punlabel <name> - Removes the pointer label specified.\n");
+			printf("  add <pointer> <arg1> [arg2] - Adds the 2 specified numbers, or adds `arg1` to the value of `pointer`.\n");
+			printf("  subtract <pointer> <arg1> [arg2] - Subtracts the 2 specified numbers, or subtracts `arg1` to the value of `pointer`.\n");
+			printf("  multiply <pointer> <arg1> [arg2] - Multiplies the 2 specified numbers, or multiplies `arg1` to the value of `pointer`.\n");
+			printf("  divide <pointer> <arg1> [arg2] - Divides the 2 specified numbers, or divides `arg1` to the value of `pointer`.\n");
+			printf("\nText formatting:\n");
+			printf(" You can use formatting codes by using <tValue> in an input, where `t` is the type, and `Value` is the value.\n");
+			printf("  '}' - Prints the value to the screen\n");
+			printf("  '{' - Takes input from the user.\n");
+			printf("  '^lt' - Gets replaced with '<'.\n");
+			printf("  '^gt' - Gets replaced with '>'.\n");
+			printf("  '~' - Runs the command specified.\n");
+			printf("  'xXX' - Gets replaced with the specified ASCII character.\n");
+			printf("  '*' - Reads a string value from the specified pointer.\n");
+			printf("  '#' - Reads an integer value from the specified pointer.\n");
+			printf("  'l' - Reads a string value from the specified pointer label.\n");
+			printf("  'L' - Reads an integer value from the specified pointer label.\n");
+;		}
 		else {
 			printf("\nIf you want a list of all commands, type \"help all\".\n");
 		}
@@ -125,7 +141,8 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 	}
 	if (strcmp(args[0], "clear") == 0) {
 #ifdef __unix__
-		system("clear");
+		printf("\033[2J");
+		printf("\x1b[H\x1b[J");
 #elif _WIN32
 		COORD startPos = { 0, 0 };
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -147,7 +164,7 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 	if (strcmp(args[0], "memset") == 0) {
 		void* pointer = (void*)strtol(args[1], NULL, 16);
 		if (pointer != NULL) {
-			bool success = CheckWritePointer(pointer,strlen(args[1]));
+			bool success = CheckWritePointer(pointer, strlen(args[1]));
 			if (success == true) {
 				memcpy(pointer, args[2], strlen(args[2]));
 			}
@@ -202,12 +219,15 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 		commandProcessed = true;
 		if (args[1] != NULL) {
 			void* pointer = (void*)strtol(args[1], NULL, 16);
+#ifdef _WIN32
+			if (!_CrtIsValidPointer(pointer, 1, 1)) {
+				printf("Pointer is invalid.\n");
+				goto exitCommand;
+			}
+#endif
 			if (args[2] != NULL) {
 				if (strlen(args[2]) < 64) {
-					char *name = calloc(1,64);
-					strncpy(name, args[2], 64);
-					struct PointerLabel pLabel = { name, pointer };
-					pointerLabels[latestPointerLabel] = pLabel;
+					createPointerLabel(pointer, args[2]);
 				}
 				else {
 					printf("Label name is too long.\n");
@@ -224,13 +244,7 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 	}
 	if (strcmp(args[0], "punlabel") == 0) {
 		commandProcessed = true;
-		unsigned short i;
-		for (i = 0; i < latestPointerLabel; i++) {
-			struct PointerLabel tempPointerLabel = pointerLabels[i];
-			if (strcmp((tempPointerLabel.name), args[1]) == 0) {
-				memset(&tempPointerLabel, 0x0, sizeof(tempPointerLabel));
-			}
-		}
+
 	}
 	if (strcmp(args[0], "add") == 0) {
 		commandProcessed = true;
@@ -241,14 +255,21 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 					unsigned int number = atoi(args[2]) + atoi(args[3]);
 					bool success = CheckWritePointer(pointer, strlen(args[1]));
 					if (success == true) {
-						memcpy(pointer, number, sizeof(int));
+						memcpy(pointer, &number, sizeof(int));
 					}
 					else {
 						printf("Failed to write to memory.\n");
 					}
 				}
 				else {
-					printf("Please specify the second number.\n");
+					bool success = CheckWritePointer(pointer, strlen(args[1]));
+					if (success == true) {
+						unsigned int number = *((int*)pointer) + atoi(args[2]);
+						memcpy(pointer, &number, sizeof(int));
+					}
+					else {
+						printf("Failed to write to memory.\n");
+					}
 				}
 			}
 			else {
@@ -268,14 +289,21 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 					unsigned int number = atoi(args[2]) - atoi(args[3]);
 					bool success = CheckWritePointer(pointer, strlen(args[1]));
 					if (success == true) {
-						memcpy(pointer, number, sizeof(int));
+						memcpy(pointer, &number, sizeof(int));
 					}
 					else {
 						printf("Failed to write to memory.\n");
 					}
 				}
 				else {
-					printf("Please specify the second number.\n");
+					bool success = CheckWritePointer(pointer, strlen(args[1]));
+					if (success == true) {
+						unsigned int number = *((int*)pointer) - atoi(args[2]);
+						memcpy(pointer, &number, sizeof(int));
+					}
+					else {
+						printf("Failed to write to memory.\n");
+					}
 				}
 			}
 			else {
@@ -295,14 +323,21 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 					unsigned int number = atoi(args[2]) * atoi(args[3]);
 					bool success = CheckWritePointer(pointer, strlen(args[1]));
 					if (success == true) {
-						memcpy(pointer, number, sizeof(int));
+						memcpy(pointer, &number, sizeof(int));
 					}
 					else {
 						printf("Failed to write to memory.\n");
 					}
 				}
 				else {
-					printf("Please specify the second number.\n");
+					bool success = CheckWritePointer(pointer, strlen(args[1]));
+					if (success == true) {
+						unsigned int number = *((int*)pointer) * atoi(args[2]);
+						memcpy(pointer, &number, sizeof(int));
+					}
+					else {
+						printf("Failed to write to memory.\n");
+					}
 				}
 			}
 			else {
@@ -322,14 +357,21 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 					unsigned int number = atoi(args[2]) / atoi(args[3]);
 					bool success = CheckWritePointer(pointer, strlen(args[1]));
 					if (success == true) {
-						memcpy(pointer, number, sizeof(int));
+						memcpy(pointer, &number, sizeof(int));
 					}
 					else {
 						printf("Failed to write to memory.\n");
 					}
 				}
 				else {
-					printf("Please specify the second number.\n");
+					bool success = CheckWritePointer(pointer, strlen(args[1]));
+					if (success == true) {
+						unsigned int number = *((int*)pointer) / atoi(args[2]);
+						memcpy(pointer, &number, sizeof(int));
+					}
+					else {
+						printf("Failed to write to memory.\n");
+					}
 				}
 			}
 			else {
@@ -367,7 +409,7 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 			exists = true;
 			existingPath = (char*)args[0];
 			goto checkIfPathExists;
-	}
+		}
 #elif _WIN32
 		strcat(s, "\\");
 
@@ -412,7 +454,9 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 			_spawnl(0, existingPath, existingPath, args[1], args[2], args[3], args[4], NULL);
 #endif
 		}
-}
+	}
+
+exitCommand:
 
 	if (commandProcessed == false && strcmp(args[0], "") != 0) {
 		printf("Command not found!\n");
@@ -422,10 +466,14 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 
 extern const char* ProcessInput(char* input, char* args[], unsigned short maxSize) {
 	input[strcspn(input, "\r\n")] = 0;
-	SplitStringAndFormat(args, input, ' ', maxSize);
+
+	char* newInput = calloc(8191, 1);
+	TakeFormattedArguments(newInput, input);
+
+	SplitString(args, newInput, ' ', maxSize);
 
 	const char* output = ProcessCommand((const char**)args, maxSize);
-
+	free(newInput);
 	unsigned int i = 0;
 	while (args[i] != NULL) {
 		free(args[i]);

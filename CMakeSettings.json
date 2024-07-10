@@ -42,36 +42,28 @@
       "inheritEnvironments": [ "msvc_arm64_x64" ]
     },
     {
-      "name": "Linux-GCC-Release",
+      "name": "WSL-GCC-Release",
       "generator": "Unix Makefiles",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "MinSizeRel",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeExecutable": "cmake",
-      "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "${defaultRemoteMachineName}",
-      "remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
-      "remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
-      "remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
-      "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
-      "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
+      "inheritEnvironments": [ "linux_x86" ],
+      "wslPath": "C:\\Users\\qcoll\\AppData\\Local\\Microsoft\\WindowsApps\\ubuntu.exe",
       "variables": [
         {
-          "name": "CMAKE_C_COMPILER",
-          "value": "/usr/bin/gcc",
-          "type": "FILEPATH"
+          "name": "CMAKE_CXX_FLAGS_DEBUG",
+          "value": "-g",
+          "type": "STRING"
         },
         {
-          "name": "CMAKE_CXX_COMPILER",
-          "value": "/usr/bin/g++",
-          "type": "FILEPATH"
+          "name": "CMAKE_CXX_FLAGS",
+          "value": "",
+          "type": "STRING"
         }
-      ],
-      "intelliSenseMode": "linux-gcc-x64"
+      ]
     }
   ]
 }

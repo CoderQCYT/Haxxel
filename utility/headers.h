@@ -22,6 +22,7 @@
 #include <curses.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <ncurses.h>
 #endif
 #include <stdint.h>
 #endif

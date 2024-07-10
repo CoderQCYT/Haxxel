@@ -3,9 +3,9 @@ struct PointerLabel {
 	void* pointer;
 };
 
-struct PointerLabel pointerLabels[128];
-int latestPointerLabel;
-
 
 extern void initalizePointerLabels();
+extern void createPointerLabel(void* pointer, char* tempName);
+extern void deletePointerLabel(char name[64]);
+extern void* getPointerAtLabel(char name[64]);
 #define maxPointerSize 128

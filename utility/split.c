@@ -2,34 +2,6 @@
 #include "command.h"
 #include "pointerLabels.h"
 
-extern void SplitString(char* result[], char* input, char delimiter, unsigned short maxSize) {
-	bool shouldSplit = true;
-	unsigned int inputLength = strlen(input) + 1;
-	unsigned short i = 0;
-	unsigned short j = 0;
-	unsigned short k = 0;
-	char* tempPointer = (char*)calloc(1,inputLength);
-	result[j] = tempPointer;
-	input[strcspn(input, "\r\n")] = 0;
-	while (input[k] != NULL) {
-		if (input[k] == '\"') {
-			shouldSplit = !shouldSplit;
-		}
-		else if (input[k] == delimiter && shouldSplit == true) {
-			memset(&tempPointer[i], 0x00, 1);
-			tempPointer = (char*)calloc(1, inputLength);
-			i = 0;
-			j++;
-			result[j] = tempPointer;
-		}
-		else {
-			memset(&tempPointer[i], input[k], 1);
-			i++;
-		}
-		k++;
-	}
-}
-
 extern void TakeFormattedArguments(char* newString, char* oldString) {
 	unsigned int i = 0;
 	bool isPartOfTag = false;
@@ -38,6 +10,7 @@ extern void TakeFormattedArguments(char* newString, char* oldString) {
 	commandValue[0] = '\00';
 
 	if (oldString == NULL) {
+		newString = NULL;
 		return;
 	}
 
@@ -77,18 +50,19 @@ extern void TakeFormattedArguments(char* newString, char* oldString) {
 					strcat(newString, input);
 				}
 				if (commandType == '$') {
-					for (unsigned short i = 0; i < maxPointerSize; i++) {
-						struct PointerLabel tempPointerLabel = pointerLabels[i];
-						if (tempPointerLabel.name == NULL && tempPointerLabel.pointer == NULL) {
-							continue;
-						}
-						if (strcmp((tempPointerLabel.name), commandValue) == 0) {
-
-							char pointer[12];
-							sprintf(pointer, "0x%p", tempPointerLabel.pointer);
-							strncat(newString, pointer, 9);
-						}
-					}
+					char pointer[12];
+					sprintf(pointer, "%p", getPointerAtLabel(commandValue));
+					strncat(newString, pointer, 12);
+				}
+				if (commandType == 'l') {
+					char result[35];
+					snprintf(result, "%s", 35, *(char*)getPointerAtLabel(commandValue));
+					strncat(newString, result, 12);
+				}
+				if (commandType == 'L') {
+					char result[sizeof(int)];
+					snprintf(result, "%d", sizeof(int), *(int*)getPointerAtLabel(commandValue));
+					strncat(newString, result, strlen(result));
 				}
 				if (commandType == '*') {
 					void* pointer = (void*)strtol(commandValue, NULL, 16);
@@ -115,6 +89,33 @@ extern void TakeFormattedArguments(char* newString, char* oldString) {
 						strcat(newString, "????");
 					}
 				}
+				if (commandType == '#') {
+					void* pointer = (void*)strtol(commandValue, NULL, 16);
+
+					bool success = false;
+#ifdef _WIN32
+					if (IsBadReadPtr(pointer, strlen(commandValue)) == 0) {
+						success = true;
+					}
+#elif __unix
+					int nullfd = open("/dev/random", O_WRONLY);
+
+					if (write(nullfd, pointer, 1) >= 0)
+					{
+						success = true;
+					}
+					close(nullfd);
+#endif
+					if (pointer == NULL) { success = false; }
+					if (success == true) {
+						char buffer[sizeof(int) * 8 + 1];
+						itoa(*(int*)pointer, buffer, 10);
+						strcat(newString, buffer);
+					}
+					else {
+						strcat(newString, "????");
+					}
+				}
 				continue;
 			}
 			if (commandType == NULL) {
@@ -134,6 +135,36 @@ extern void TakeFormattedArguments(char* newString, char* oldString) {
 	}
 	free(commandValue);
 }
+
+
+extern void SplitString(char* result[], char* input, char delimiter, unsigned short maxSize) {
+	bool shouldSplit = true;
+	unsigned int inputLength = strlen(input) + 1;
+	unsigned short i = 0;
+	unsigned short j = 0;
+	unsigned short k = 0;
+	char* tempPointer = (char*)calloc(1, inputLength);
+	result[j] = tempPointer;
+	input[strcspn(input, "\r\n")] = 0;
+	while (input[k] != NULL) {
+		if (input[k] == '\"') {
+			shouldSplit = !shouldSplit;
+		}
+		else if (input[k] == delimiter && shouldSplit == true) {
+			memset(&tempPointer[i], 0x00, 1);
+			tempPointer = (char*)calloc(1, inputLength);
+			i = 0;
+			j++;
+			result[j] = tempPointer;
+		}
+		else {
+			memset(&tempPointer[i], input[k], 1);
+			i++;
+		}
+		k++;
+	}
+}
+
 
 extern void SplitStringAndFormat(char* result[], char* input, char delimiter, unsigned short maxSize) {
 	bool shouldSplit = true;

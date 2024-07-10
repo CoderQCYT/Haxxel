@@ -1,10 +1,10 @@
 #include "headers.h"
-#include "split.h"
 #include "command.h"
+#include "split.h"
 #include "pointerLabels.h"
 
 
-bool CheckWritePointer(void* pointer, unsigned short length) {
+extern bool CheckWritePointer(void* pointer, unsigned short length) {
 	bool success = false;
 #ifdef _WIN32
 	if (IsBadWritePtr(pointer, length) == 0) {
@@ -59,7 +59,6 @@ static int exec_prog(const char** argv)
 	return 0;
 }
 #endif
-
 
 
 extern const char* ProcessCommand(const char* args[], const unsigned short maxSize) {
@@ -225,7 +224,8 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 	}
 	if (strcmp(args[0], "punlabel") == 0) {
 		commandProcessed = true;
-		for (unsigned short i = 0; i < latestPointerLabel; i++) {
+		unsigned short i;
+		for (i = 0; i < latestPointerLabel; i++) {
 			struct PointerLabel tempPointerLabel = pointerLabels[i];
 			if (strcmp((tempPointerLabel.name), args[1]) == 0) {
 				memset(&tempPointerLabel, 0x0, sizeof(tempPointerLabel));

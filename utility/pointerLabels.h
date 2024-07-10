@@ -1,11 +1,11 @@
-#ifndef pointerLabelHeader
-#define pointerLabelHeader
-
-typedef struct PointerLabel {
+struct PointerLabel {
 	char* name;
 	void* pointer;
 };
 
 struct PointerLabel pointerLabels[128];
+int latestPointerLabel;
+
+
+extern void initalizePointerLabels();
 #define maxPointerSize 128
-#endif 

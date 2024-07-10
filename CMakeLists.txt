@@ -10,7 +10,7 @@ project ("Haxxel")
 
 
 # Add source to this project's executable.
-add_executable (Haxxel "main.c" "libraries/dirent.h" "utility/split.h" "utility/command.c" "utility/split.c" "utility/headers.h" "utility/command.h")
+add_executable (Haxxel "main.c" "libraries/dirent.h" "utility/split.h" "utility/command.c" "utility/split.c" "utility/headers.h" "utility/command.h" "utility/pointerLabels.c")
 
 
 # TODO: Add tests and install targets if needed.

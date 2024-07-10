@@ -1,3 +1,5 @@
+#ifndef headers
+#define headers
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -22,3 +24,4 @@
 #include <fcntl.h>
 #endif
 #include <stdint.h>
+#endif

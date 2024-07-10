@@ -1,9 +1,7 @@
 ﻿#include "utility/headers.h"
 #include "utility/command.h"
+
 #include "utility/pointerLabels.h"
-
-
-
 
 
 
@@ -15,16 +13,13 @@ int main(int argc, char* argv[]) {
 	SetConsoleTitle("Haxxel");
 #endif
 	char** token = (char*)calloc(8191, 1);
-	pointerLabels;
-	if (pointerLabels == NULL) {
-		printf("Failed to allocate memory for pointer labels!");
-	}
-	latestPointerLabel = 0;
 
 	if (token == NULL) {
 		printf("Failed to allocate enough memory to hold essential values.");
 		return 137;
 	}
+
+	initalizePointerLabels();
 
 	if (argv[1] != NULL) {
 		char* dot = strrchr(argv[1], '.');
@@ -50,14 +45,15 @@ int main(int argc, char* argv[]) {
 
 	printf("Haxxel Beta\n");
 	printf("By: @CoderQC\n"); // Replace this line once it's open source :D
+	char* input;
 	while (true) {
-		char input[8191];
+		input = calloc(8191,1);
 		printf("> ");
 		fgets(input, 8191, stdin);
-		ProcessInput(&input, token, 8191);
+		ProcessInput(input, token, 8191);
 		memset(token, 0x0, 8191);
 	}
-
+	free(input);
 	free(token);
 	return 0;
 }

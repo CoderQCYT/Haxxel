@@ -2,6 +2,17 @@
 #include "command.h"
 #include "pointerLabels.h"
 
+
+char* my_itoa(long n)
+{
+	int len = n == 0 ? 1 : floor(log10l(labs(n))) + 1;
+	if (n < 0) len++; // room for negative sign '-'
+
+	char* buf = calloc(sizeof(char), len + 1); // +1 for null
+	snprintf(buf, len + 1, "%ld", n);
+	return buf;
+}
+
 extern void TakeFormattedArguments(char* newString, char* oldString) {
 	unsigned int i = 0;
 	bool isPartOfTag = false;
@@ -108,9 +119,7 @@ extern void TakeFormattedArguments(char* newString, char* oldString) {
 #endif
 					if (pointer == NULL) { success = false; }
 					if (success == true) {
-						char buffer[sizeof(int) * 8 + 1];
-						itoa(*(int*)pointer, buffer, 10);
-						strcat(newString, buffer);
+						strcat(newString, my_itoa(*(int*)pointer));
 					}
 					else {
 						strcat(newString, "????");

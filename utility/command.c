@@ -4,7 +4,7 @@
 #include "pointerLabels.h"
 
 
-bool CheckWritePointer(pointer,length) {
+bool CheckWritePointer(void* pointer, unsigned short length) {
 	bool success = false;
 #ifdef _WIN32
 	if (IsBadWritePtr(pointer, length) == 0) {

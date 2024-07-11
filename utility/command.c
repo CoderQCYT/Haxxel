@@ -183,8 +183,8 @@ extern const char* ProcessCommand(const char* args[], const unsigned short maxSi
 		if (size > 0) {
 			void* pointer = calloc(1, size);
 			if (pointer != NULL) {
-				printf("Allocated an address: 0x%p\n", pointer);
-				sprintf(output, "0x%p", pointer);
+				printf("Allocated an address: %p\n", pointer);
+				sprintf(output, "%p", pointer);
 			}
 			else {
 				printf("Failed to allocate.\n");

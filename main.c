@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	HANDLE handleConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTitle("Haxxel");
 #endif
-	char** token = (char*)calloc(8191, 1);
+	char** token = (char*)calloc(1,8191);
 
 	if (token == NULL) {
 		printf("Failed to allocate enough memory to hold essential values.");
@@ -49,13 +49,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	printf("Haxxel Beta\n");
-	printf("By: @CoderQC\n"); // Replace this line once it's open source :D
-	char* input;
+	printf("By: @CoderQC\n"); // Replace this line once55 it's open source :D
+	char* input = calloc(1,8191);
 	while (true) {
 
 		// Maybe handle arrow keys for Linux sometime soon, but ncurses doesn't work for me.
 
-		input = calloc(8191, 1);
 		printf("> ");
 		fgets(input, 8191, stdin);
 		ProcessInput(input, token, 8191);

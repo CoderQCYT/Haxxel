@@ -2,12 +2,11 @@
 #include "utility/command.h"
 
 #include "utility/pointerLabels.h"
-
+#include "lua_handler.h"
 
 
 
 int main(int argc, char* argv[]) {
-
 #ifdef _WIN32
 	HANDLE handleConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTitle("Haxxel");
@@ -42,6 +41,26 @@ int main(int argc, char* argv[]) {
 				buffer[strcspn(buffer, "\n")] = 0;
 				ProcessInput(buffer, token, 8191);
 			}
+
+			fclose(fp);
+			exit(0);
+		}
+	}
+
+	if (argv[1] != NULL && strcmp(argv[1], "--lua") == 0) {
+		if (argv[2] == NULL) {
+			printf("Please specify a Lua script.\n\n");
+			exit(1);
+		}
+		else {
+			FILE* fp;
+			fp = fopen(argv[2], "r");
+			if (fp == NULL) {
+				perror("Failed: ");
+				exit(1);
+			}
+
+			RunHaxxelLuaFile(argv[2]);
 
 			fclose(fp);
 			exit(0);

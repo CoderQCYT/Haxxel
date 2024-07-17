@@ -25,7 +25,7 @@ extern void deletePointerLabel(char name[64]) {
 	unsigned short i;
 	for (i = 0; i < nextPointerLabel; i++) {
 		struct PointerLabel tempPointerLabel = pointerLabels[i];
-		if (strcmp((tempPointerLabel.name), &name) == 0) {
+		if (strcmp((tempPointerLabel.name), name) == 0) {
 			memset(&tempPointerLabel, 0x0, sizeof(tempPointerLabel));
 		}
 	}

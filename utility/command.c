@@ -467,7 +467,7 @@ exitCommand:
 extern const char* ProcessInput(char* input, char* args[], unsigned short maxSize) {
 	input[strcspn(input, "\r\n")] = 0;
 
-	char* newInput = calloc(8191, 1);
+	char* newInput = calloc(maxSize, 1);
 	TakeFormattedArguments(newInput, input);
 
 	SplitString(args, newInput, ' ', maxSize);
